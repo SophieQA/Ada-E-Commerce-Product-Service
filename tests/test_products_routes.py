@@ -2,7 +2,6 @@ KEY_NAME = "product-key"
 
 
 def seed(table, *items):
-    """Helper to insert one or more items into the moto table."""
     for item in items:
         table.put_item(Item=item)
 
