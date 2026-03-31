@@ -1,5 +1,34 @@
+import os
+import boto3
 from boto3.dynamodb.conditions import Attr
+from botocore.exceptions import ClientError
 from flask import abort, make_response, Response
+
+def generate_presigned_url(item):
+    CLIENT_METHOD = "get_object"
+    EXPIRES_IN = 1000
+    REGION_NAME = "us-east-1"
+    BUCKET_NAME = os.environ.get("BUCKET_NAME")
+
+    if not BUCKET_NAME:
+        raise ValueError("BUCKET environment variable not set")
+    
+    METHOD_PARAMS = {
+        "Bucket": BUCKET_NAME,
+        "Key": f"{item["s3_key"]}",
+    }
+
+    try:
+        s3_client = boto3.client("s3", region_name=REGION_NAME)
+        url = s3_client.generate_presigned_url(
+            ClientMethod=CLIENT_METHOD,
+            Params=METHOD_PARAMS,
+            ExpiresIn=EXPIRES_IN
+        )
+        item["image_url"] = url
+
+    except ClientError as e:
+        abort(make_response("There was an error generating URL", 500))
 
 
 def validate_item(table, key_name, id):
@@ -9,6 +38,8 @@ def validate_item(table, key_name, id):
     if not item:
         not_found = {"message": f"Item with {key_name} ({id}) not found."}
         abort(make_response(not_found, 404))
+    
+    generate_presigned_url(item)
 
     return item
 
@@ -32,6 +63,9 @@ def get_items_with_filters(table, args):
 
     response = table.scan(**scan_kwargs)
     items = response["Items"]
+
+    for item in items:
+        generate_presigned_url(item)
 
     if sort_by:
         reverse = order == "desc"

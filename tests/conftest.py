@@ -5,9 +5,11 @@ from moto import mock_aws
 
 TABLE_NAME = "test-table"
 KEY_NAME = "product-key"
+BUCKET_NAME = "test-bucket"
 
 os.environ["TABLE_NAME"] = TABLE_NAME
 os.environ["KEY_NAME"] = KEY_NAME
+os.environ["BUCKET_NAME"] = BUCKET_NAME
 os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 os.environ["AWS_ACCESS_KEY_ID"] = "testing"
 os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
@@ -33,6 +35,10 @@ def dynamodb_table():
             BillingMode="PAY_PER_REQUEST",
         )
         table.wait_until_exists()
+
+        s3 = boto3.client("s3", region_name="us-east-1")
+        s3.create_bucket(Bucket=BUCKET_NAME)
+
         yield table
 
 
