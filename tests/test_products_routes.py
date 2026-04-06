@@ -1,5 +1,6 @@
 KEY_NAME = "product-key"
 
+
 def seed(table, *items):
     for item in items:
         table.put_item(Item=item)
@@ -7,8 +8,10 @@ def seed(table, *items):
 # POST /products/
 # ---------------------------------------------------------------------------
 
+
 def test_create_product_returns_product_with_generated_key(client):
-    response = client.post("/products/", json={"name": "Widget", "description": "A test widget"})
+    response = client.post(
+        "/products/", json={"name": "Widget", "description": "A test widget"})
 
     assert response.status_code == 200
     data = response.get_json()
@@ -31,8 +34,8 @@ def test_create_product_persists_to_dynamodb(client, dynamodb_table):
 
 def test_get_all_products_returns_all_items(client, dynamodb_table):
     seed(dynamodb_table,
-        {KEY_NAME: "1", "name": "Apple", "s3_key": "apple.jpg"},
-        {KEY_NAME: "2", "name": "Banana", "s3_key": "banana.jpg"})
+         {KEY_NAME: "1", "name": "Apple", "s3_key": "apple.jpg"},
+         {KEY_NAME: "2", "name": "Banana", "s3_key": "banana.jpg"})
 
     response = client.get("/products/")
 
@@ -49,8 +52,8 @@ def test_get_all_products_returns_empty_list(client):
 
 def test_get_all_products_filters_by_name(client, dynamodb_table):
     seed(dynamodb_table,
-        {KEY_NAME: "1", "name": "Apple Juice", "s3_key": "apple-juice.jpg"},
-        {KEY_NAME: "2", "name": "Banana", "s3_key": "banana.jpg"})
+         {KEY_NAME: "1", "name": "Apple Juice", "s3_key": "apple-juice.jpg"},
+         {KEY_NAME: "2", "name": "Banana", "s3_key": "banana.jpg"})
 
     response = client.get("/products/?name=Apple")
 
@@ -62,8 +65,8 @@ def test_get_all_products_filters_by_name(client, dynamodb_table):
 
 def test_get_all_products_sorts_by_name_ascending(client, dynamodb_table):
     seed(dynamodb_table,
-        {KEY_NAME: "1", "name": "Banana", "s3_key": "banana.jpg"},
-        {KEY_NAME: "2", "name": "Apple", "s3_key": "apple.jpg"})
+         {KEY_NAME: "1", "name": "Banana", "s3_key": "banana.jpg"},
+         {KEY_NAME: "2", "name": "Apple", "s3_key": "apple.jpg"})
 
     response = client.get("/products/?sort_by=name")
 
@@ -105,7 +108,8 @@ def test_get_all_products_invalid_order_returns_400(client):
 # ---------------------------------------------------------------------------
 
 def test_get_single_product_returns_product(client, dynamodb_table):
-    seed(dynamodb_table, {KEY_NAME: "abc-123", "name": "Widget", "s3_key": "widget.jpg"})
+    seed(dynamodb_table, {KEY_NAME: "abc-123",
+        "name": "Widget", "s3_key": "widget.jpg"})
 
     response = client.get("/products/abc-123")
 
@@ -127,7 +131,8 @@ def test_get_single_product_not_found_returns_404(client):
 # ---------------------------------------------------------------------------
 
 def test_update_product_returns_204(client, dynamodb_table):
-    seed(dynamodb_table, {KEY_NAME: "abc-123", "name": "Old Name", "description": "Old desc", "s3_key": "widget.jpg"})
+    seed(dynamodb_table, {KEY_NAME: "abc-123", "name": "Old Name",
+        "description": "Old desc", "s3_key": "widget.jpg"})
 
     response = client.patch("/products/abc-123", json={"name": "New Name"})
 
@@ -135,7 +140,8 @@ def test_update_product_returns_204(client, dynamodb_table):
 
 
 def test_update_product_persists_change(client, dynamodb_table):
-    seed(dynamodb_table, {KEY_NAME: "abc-123", "name": "Old Name", "description": "desc", "s3_key": "widget.jpg"})
+    seed(dynamodb_table, {KEY_NAME: "abc-123", "name": "Old Name",
+        "description": "desc", "s3_key": "widget.jpg"})
 
     client.patch("/products/abc-123", json={"name": "New Name"})
 
@@ -150,16 +156,19 @@ def test_update_product_not_found_returns_404(client):
 
 
 def test_update_product_no_valid_attributes_returns_400(client, dynamodb_table):
-    seed(dynamodb_table, {KEY_NAME: "abc-123", "name": "Widget", "s3_key": "widget.jpg"})
+    seed(dynamodb_table, {KEY_NAME: "abc-123",
+        "name": "Widget", "s3_key": "widget.jpg"})
 
-    response = client.patch("/products/abc-123", json={"nonexistent_field": "value"})
+    response = client.patch("/products/abc-123",
+                            json={"nonexistent_field": "value"})
 
     assert response.status_code == 400
     assert "No valid attributes" in response.get_json()["message"]
 
 
 def test_update_product_cannot_update_primary_key(client, dynamodb_table):
-    seed(dynamodb_table, {KEY_NAME: "abc-123", "name": "Widget", "s3_key": "widget.jpg"})
+    seed(dynamodb_table, {KEY_NAME: "abc-123",
+        "name": "Widget", "s3_key": "widget.jpg"})
 
     response = client.patch("/products/abc-123", json={KEY_NAME: "new-id"})
 
@@ -171,7 +180,8 @@ def test_update_product_cannot_update_primary_key(client, dynamodb_table):
 # ---------------------------------------------------------------------------
 
 def test_delete_product_returns_204(client, dynamodb_table):
-    seed(dynamodb_table, {KEY_NAME: "abc-123", "name": "Widget", "s3_key": "widget.jpg"})
+    seed(dynamodb_table, {KEY_NAME: "abc-123",
+        "name": "Widget", "s3_key": "widget.jpg"})
 
     response = client.delete("/products/abc-123")
 
@@ -179,7 +189,8 @@ def test_delete_product_returns_204(client, dynamodb_table):
 
 
 def test_delete_product_removes_item_from_dynamodb(client, dynamodb_table):
-    seed(dynamodb_table, {KEY_NAME: "abc-123", "name": "Widget", "s3_key": "widget.jpg"})
+    seed(dynamodb_table, {KEY_NAME: "abc-123",
+        "name": "Widget", "s3_key": "widget.jpg"})
 
     client.delete("/products/abc-123")
 

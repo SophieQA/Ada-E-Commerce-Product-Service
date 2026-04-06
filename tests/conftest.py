@@ -2,6 +2,7 @@ import os
 import boto3
 import pytest
 from moto import mock_aws
+from app import create_app
 
 TABLE_NAME = "test-table"
 KEY_NAME = "product-key"
@@ -13,8 +14,6 @@ os.environ["BUCKET_NAME"] = BUCKET_NAME
 os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
 os.environ["AWS_ACCESS_KEY_ID"] = "testing"
 os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
-
-from app import create_app
 
 
 @pytest.fixture
@@ -31,7 +30,8 @@ def dynamodb_table():
         table = dynamodb.create_table(
             TableName=TABLE_NAME,
             KeySchema=[{"AttributeName": KEY_NAME, "KeyType": "HASH"}],
-            AttributeDefinitions=[{"AttributeName": KEY_NAME, "AttributeType": "S"}],
+            AttributeDefinitions=[
+                {"AttributeName": KEY_NAME, "AttributeType": "S"}],
             BillingMode="PAY_PER_REQUEST",
         )
         table.wait_until_exists()

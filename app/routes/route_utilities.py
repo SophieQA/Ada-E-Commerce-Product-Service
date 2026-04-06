@@ -4,6 +4,7 @@ from boto3.dynamodb.conditions import Attr
 from botocore.exceptions import ClientError
 from flask import abort, make_response, Response
 
+
 def generate_presigned_url(item):
     CLIENT_METHOD = "get_object"
     EXPIRES_IN = 1000
@@ -12,7 +13,7 @@ def generate_presigned_url(item):
 
     if not BUCKET_NAME:
         raise ValueError("BUCKET environment variable not set")
-    
+
     METHOD_PARAMS = {
         "Bucket": BUCKET_NAME,
         "Key": f"{item["s3_key"]}",
@@ -38,7 +39,7 @@ def validate_item(table, key_name, id):
     if not item:
         not_found = {"message": f"Item with {key_name} ({id}) not found."}
         abort(make_response(not_found, 404))
-    
+
     generate_presigned_url(item)
 
     return item
@@ -46,8 +47,8 @@ def validate_item(table, key_name, id):
 
 def get_items_with_filters(table, args):
     sort_by = args.get("sort_by")
-    order   = args.get("order", "asc").lower()
-    name    = args.get("name")
+    order = args.get("order", "asc").lower()
+    name = args.get("name")
 
     sortable_fields = {"name", "price"}
 
@@ -82,8 +83,9 @@ def build_and_run_update(table, key, body):
     if not allowed:
         abort(make_response({"message": "No valid attributes to update"}, 400))
 
-    update_expr = "SET " + ", ".join(f"#n{i} = :v{i}" for i in range(len(allowed)))
-    attr_names  = {f"#n{i}": k for i, k in enumerate(allowed.keys())}
+    update_expr = "SET " + \
+        ", ".join(f"#n{i} = :v{i}" for i in range(len(allowed)))
+    attr_names = {f"#n{i}": k for i, k in enumerate(allowed.keys())}
     attr_values = {f":v{i}": v for i, v in enumerate(allowed.values())}
 
     table.update_item(
