@@ -5,8 +5,6 @@ from .routes.products_routes import bp as products_bp
 def create_app():
     app = Flask(__name__)
 
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
     app.register_blueprint(products_bp)
 
     @app.get('/')

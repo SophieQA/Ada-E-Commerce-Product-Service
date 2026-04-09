@@ -2,42 +2,43 @@ import os
 import boto3
 import pytest
 from moto import mock_aws
-from app import create_app
-
-TABLE_NAME = "test-table"
-KEY_NAME = "product-key"
-BUCKET_NAME = "test-bucket"
-
-os.environ["TABLE_NAME"] = TABLE_NAME
-os.environ["KEY_NAME"] = KEY_NAME
-os.environ["BUCKET_NAME"] = BUCKET_NAME
-os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
-os.environ["AWS_ACCESS_KEY_ID"] = "testing"
-os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
 
 
 @pytest.fixture
-def app():
+def aws_credentials():
+    os.environ["TABLE_NAME"] = "test-table"
+    os.environ["KEY_NAME"] = "product-key"
+    os.environ["BUCKET_NAME"] = "test-bucket"
+    os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
+    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
+    os.environ["S3_DEFAULT_KEY"] = "S3_DEFAULT_KEY"
+
+
+@pytest.fixture
+def app(aws_credentials):
+    from app import create_app
     flask_app = create_app()
-    flask_app.config["TESTING"] = True
     return flask_app
 
 
 @pytest.fixture
 def dynamodb_table():
     with mock_aws():
-        dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
+        dynamodb = boto3.resource(
+            "dynamodb", region_name=os.environ["AWS_DEFAULT_REGION"])
         table = dynamodb.create_table(
-            TableName=TABLE_NAME,
-            KeySchema=[{"AttributeName": KEY_NAME, "KeyType": "HASH"}],
+            TableName=os.environ["TABLE_NAME"],
+            KeySchema=[
+                {"AttributeName":  os.environ["KEY_NAME"], "KeyType": "HASH"}],
             AttributeDefinitions=[
-                {"AttributeName": KEY_NAME, "AttributeType": "S"}],
+                {"AttributeName": os.environ["KEY_NAME"], "AttributeType": "S"}],
             BillingMode="PAY_PER_REQUEST",
         )
         table.wait_until_exists()
 
-        s3 = boto3.client("s3", region_name="us-east-1")
-        s3.create_bucket(Bucket=BUCKET_NAME)
+        s3 = boto3.client("s3", region_name=os.environ["AWS_DEFAULT_REGION"])
+        s3.create_bucket(Bucket=os.environ["BUCKET_NAME"])
 
         yield table
 

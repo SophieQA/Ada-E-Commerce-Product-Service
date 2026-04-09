@@ -16,7 +16,7 @@ def generate_presigned_url(item):
 
     METHOD_PARAMS = {
         "Bucket": BUCKET_NAME,
-        "Key": f"{item["s3_key"]}",
+        "Key": f"{item.get("s3_key", os.environ.get("S3_DEFAULT_KEY"))}",
     }
 
     try:
@@ -28,7 +28,7 @@ def generate_presigned_url(item):
         )
         item["image_url"] = url
 
-    except ClientError as e:
+    except ClientError:
         abort(make_response("There was an error generating URL", 500))
 
 
