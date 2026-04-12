@@ -1,8 +1,10 @@
 import os
 import boto3
+from .tables.products import products_table
 from boto3.dynamodb.conditions import Attr
 from botocore.exceptions import ClientError
-from flask import abort, make_response, Response
+
+KEY_NAME = os.environ.get("KEY_NAME")
 
 
 def generate_presigned_url(item):
@@ -29,16 +31,15 @@ def generate_presigned_url(item):
         item["image_url"] = url
 
     except ClientError:
-        abort(make_response("There was an error generating URL", 500))
+        raise RuntimeError("There was an error generating URL")
 
 
-def validate_item(table, key_name, id):
-    response = table.get_item(Key={key_name: id})
+def validate_item(table, id):
+    response = table.get_item(Key={KEY_NAME: id})
     item = response.get("Item")
 
     if not item:
-        not_found = {"message": f"Item with {key_name} ({id}) not found."}
-        abort(make_response(not_found, 404))
+        raise LookupError(f"Item with {KEY_NAME} ({id}) not found.")
 
     generate_presigned_url(item)
 
@@ -53,10 +54,10 @@ def get_items_with_filters(table, args):
     sortable_fields = {"name", "price"}
 
     if sort_by and sort_by not in sortable_fields:
-        return {"error": f"sort_by must be one of: {', '.join(sortable_fields)}"}, 400
+        raise ValueError(f"sort_by must be one of: {', '.join(sortable_fields)}")
 
     if order not in ("asc", "desc"):
-        return {"error": "order must be asc or desc"}, 400
+        raise ValueError("order must be asc or desc")
 
     scan_kwargs = {}
     if name:
@@ -72,16 +73,16 @@ def get_items_with_filters(table, args):
         reverse = order == "desc"
         items.sort(key=lambda item: item.get(sort_by, ""), reverse=reverse)
 
-    return items, 200
+    return items
 
 
-def build_and_run_update(table, key, body):
-    existing = validate_item(table, list(key.keys())[0], list(key.values())[0])
+def build_and_run_update(table, id, body):
+    existing = validate_item(table, id)
 
-    allowed = {k: v for k, v in body.items() if k in existing and k not in key}
+    allowed = {k: v for k, v in body.items() if k in existing and k != KEY_NAME}
 
     if not allowed:
-        abort(make_response({"message": "No valid attributes to update"}, 400))
+        raise ValueError("No valid attributes to update")
 
     update_expr = "SET " + \
         ", ".join(f"#n{i} = :v{i}" for i in range(len(allowed)))
@@ -89,10 +90,18 @@ def build_and_run_update(table, key, body):
     attr_values = {f":v{i}": v for i, v in enumerate(allowed.values())}
 
     table.update_item(
-        Key=key,
+        Key={KEY_NAME: id},
         UpdateExpression=update_expr,
         ExpressionAttributeNames=attr_names,
         ExpressionAttributeValues=attr_values,
     )
 
-    return Response(status=204, mimetype="application/json")
+    return True
+
+def decrement_stock(id, quantity):
+    item = validate_item(products_table, id)
+    build_and_run_update(products_table, id, {
+        "stock": item["stock"] - quantity
+    })
+
+    return True
