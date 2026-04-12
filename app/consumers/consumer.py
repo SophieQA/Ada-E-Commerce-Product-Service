@@ -35,7 +35,7 @@ def poll(wait_time=20):
         )
 
         for message in messages:
-            # try:
+            try:
                 print(f"Processing Message: {message.message_id}")
                 is_processed = process_message(message)
 
@@ -43,7 +43,7 @@ def poll(wait_time=20):
                     message.delete()
                     print(f"Message {message.message_id} PROCESSED!")
                     continue
-            # except Exception as e:
+            except Exception as e:
                 print(f"Message {message.message_id} NOT PROCESSED!")
 
 if __name__ == "__main__":
