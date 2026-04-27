@@ -4,10 +4,11 @@ from .tables.products import products_table
 from boto3.dynamodb.conditions import Attr
 from botocore.exceptions import ClientError
 
-KEY_NAME = os.environ.get("KEY_NAME")
-
-
 def generate_presigned_url(item):
+    if not item.get("s3_key"):
+        item["image_url"] = ""
+        return
+
     CLIENT_METHOD = "get_object"
     EXPIRES_IN = 1000
     REGION_NAME = "us-east-1"
@@ -18,7 +19,7 @@ def generate_presigned_url(item):
 
     METHOD_PARAMS = {
         "Bucket": BUCKET_NAME,
-        "Key": f"{item.get("s3_key", os.environ.get("S3_DEFAULT_KEY"))}",
+        "Key": f"images/{item.get("s3_key")}",
     }
 
     try:
@@ -35,6 +36,7 @@ def generate_presigned_url(item):
 
 
 def validate_item(table, id):
+    KEY_NAME = os.environ.get("KEY_NAME")
     response = table.get_item(Key={KEY_NAME: id})
     item = response.get("Item")
 
@@ -77,6 +79,7 @@ def get_items_with_filters(table, args):
 
 
 def build_and_run_update(table, id, body):
+    KEY_NAME = os.environ.get("KEY_NAME")
     existing = validate_item(table, id)
 
     allowed = {k: v for k, v in body.items() if k in existing and k != KEY_NAME}
