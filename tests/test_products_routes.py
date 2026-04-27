@@ -129,7 +129,7 @@ def test_get_single_product_not_found_returns_404(client):
     assert "not found" in response.get_json()["message"]
 
 
-def test_get_single_product_no_product_image_default_s3_key(client, dynamodb_table, aws_credentials):
+def test_get_single_product_no_s3_key_image_url_empty_string(client, dynamodb_table, aws_credentials):
     seed(dynamodb_table, {os.environ["KEY_NAME"]: "abc-123",
                           "name": "Widget"})
 
@@ -137,7 +137,7 @@ def test_get_single_product_no_product_image_default_s3_key(client, dynamodb_tab
 
     assert response.status_code == 200
     data = response.get_json()
-    assert os.environ.get("S3_DEFAULT_KEY") in data["image_url"]
+    assert data["image_url"] == ""
 
 
 # ---------------------------------------------------------------------------
