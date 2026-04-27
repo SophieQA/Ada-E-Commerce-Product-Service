@@ -95,7 +95,7 @@ Add the local variables to your `.env` file alongside your real AWS values. Comm
 
 # --- Local DynamoDB (comment out when using real AWS) ---
 TABLE_NAME=products
-KEY_NAME=product-key
+KEY_NAME=product_key
 BUCKET_NAME=local-product-images
 AWS_DEFAULT_REGION=us-east-1
 AWS_ACCESS_KEY_ID=local
