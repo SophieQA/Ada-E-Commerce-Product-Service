@@ -63,3 +63,10 @@ def delete_product(product_id):
     products_table.delete_item(Key={KEY_NAME: product_id})
 
     return Response(status=204, mimetype="application/json")
+
+
+@bp.get('/health')
+def health():
+    return {
+        "status": "healthy"
+    }, 200
