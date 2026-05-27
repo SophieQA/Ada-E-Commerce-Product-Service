@@ -54,6 +54,7 @@ Create a `.env` file in the project root:
 TABLE_NAME=<your-dynamodb-table-name>
 KEY_NAME=<your-dynamodb-partition-key>
 BUCKET_NAME=<your-s3-bucket-name>
+REGION_NAME=<region-of-dynamodb-table-and-s3-bucket>
 S3_DEFAULT_KEY=<default-s3-key-for-product-images>
 ```
 
