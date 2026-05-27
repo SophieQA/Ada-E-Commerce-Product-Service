@@ -55,7 +55,6 @@ TABLE_NAME=<your-dynamodb-table-name>
 KEY_NAME=<your-dynamodb-partition-key>
 BUCKET_NAME=<your-s3-bucket-name>
 S3_DEFAULT_KEY=<default-s3-key-for-product-images>
-QUEUE_URL=<your-sqs-queue-url>
 ```
 
 ## Running the App
