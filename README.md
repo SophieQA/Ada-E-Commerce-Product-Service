@@ -46,7 +46,10 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Set up environment variables
+### 4. Create a table in DynamoDB
+Navigate to the DynamoDB console in AWS and create a table. 
+
+### 5. Set up environment variables
 
 Create a `.env` file in the project root:
 
