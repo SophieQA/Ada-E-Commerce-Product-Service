@@ -47,7 +47,10 @@ pip install -r requirements.txt
 ```
 
 ### 4. Create a table in DynamoDB
-Navigate to the DynamoDB console in AWS and create a table. 
+Navigate to the DynamoDB console in AWS and create a table. The table will be used to store product information. We suggest using the following names:
+
+Table name: `products`
+Partition key: `product_key`
 
 ### 5. Set up environment variables
 
