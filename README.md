@@ -46,7 +46,12 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Set up environment variables
+### 4. Create the table
+Navigate to the DynamoDB console in AWS and create a table. The table will be used to store product information. We suggest using the following names:
+
+Table name: `products` Partition key: `product_key`
+
+### 5. Set up environment variables
 
 Create a `.env` file in the project root:
 
@@ -54,6 +59,7 @@ Create a `.env` file in the project root:
 TABLE_NAME=<your-dynamodb-table-name>
 KEY_NAME=<your-dynamodb-partition-key>
 BUCKET_NAME=<your-s3-bucket-name>
+REGION_NAME=<region-of-dynamodb-table-and-s3-bucket>
 S3_DEFAULT_KEY=<default-s3-key-for-product-images>
 QUEUE_URL=<your-sqs-queue-url>
 ```
@@ -78,69 +84,4 @@ python -m app.consumers.consumer
 pytest
 ```
 
-## (Optional) Working With a Local DynamoDB Table
 
-### 1. Set up environment variables
-
-Add the local variables to your `.env` file alongside your real AWS values. Comment out whichever set you are not using:
-
-```bash
-# --- Real AWS (comment out when using local) ---
-# TABLE_NAME=<your-dynamodb-table-name>
-# KEY_NAME=<your-dynamodb-partition-key>
-# BUCKET_NAME=<your-s3-bucket-name>
-# AWS_DEFAULT_REGION=<your-aws-region>
-# AWS_ACCESS_KEY_ID=<your-aws-access-key>
-# AWS_SECRET_ACCESS_KEY=<your-aws-secret-key>
-
-# --- Local DynamoDB (comment out when using real AWS) ---
-TABLE_NAME=products
-KEY_NAME=product_key
-BUCKET_NAME=local-product-images
-AWS_DEFAULT_REGION=us-east-1
-AWS_ACCESS_KEY_ID=local
-AWS_SECRET_ACCESS_KEY=local
-AWS_ENDPOINT_URL_DYNAMODB=http://localhost:8000
-```
-
-### 2. Install Docker
-
-```bash
-brew install --cask docker
-```
-
-Then open the Docker app to complete installation and make sure it is running before proceeding.
-
-### 3. Start a local DynamoDB Docker container
-
-> Port 8000 must be available.
-
-```bash
-docker run --name dynamodb-local -p 8000:8000 amazon/dynamodb-local
-```
-
-### 4. Create the table
-
-```bash
-set -a; source .env; set +a; aws dynamodb create-table \
-  --table-name "$TABLE_NAME" \
-  --attribute-definitions AttributeName="$KEY_NAME",AttributeType=S \
-  --key-schema AttributeName="$KEY_NAME",KeyType=HASH \
-  --billing-mode PAY_PER_REQUEST \
-  --endpoint-url "$AWS_ENDPOINT_URL_DYNAMODB" \
-  --region "$AWS_DEFAULT_REGION"
-```
-
-### 5. Verify the table was created
-
-```bash
-aws dynamodb list-tables --endpoint-url http://localhost:8000 --region us-east-1
-```
-
-### Restarting the container
-
-If the Docker container stops, restart it with:
-
-```bash
-docker start -ai dynamodb-local
-```
