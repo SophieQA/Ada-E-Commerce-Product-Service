@@ -12,7 +12,7 @@ def generate_presigned_url(item):
     
     CLIENT_METHOD = "get_object"
     EXPIRES_IN = 1000
-    REGION_NAME = "us-east-1"
+    REGION_NAME = os.environ.get("REGION_NAME")
     BUCKET_NAME = os.environ.get("BUCKET_NAME")
 
     if not BUCKET_NAME:
@@ -24,7 +24,14 @@ def generate_presigned_url(item):
     }
 
     try:
-        s3_client = boto3.client("s3", region_name=REGION_NAME)
+        s3_client = boto3.client(
+            "s3", 
+            region_name=REGION_NAME,
+            config=boto3.session.Config(
+                signature_version="s3v4",
+                s3={"addressing_style": "virtual"}
+            )
+          )
         url = s3_client.generate_presigned_url(
             ClientMethod=CLIENT_METHOD,
             Params=METHOD_PARAMS,
