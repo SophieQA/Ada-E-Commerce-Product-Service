@@ -33,7 +33,7 @@ def send_event(queue, event_type, payload):
 # process_message via SQS
 # ---------------------------------------------------------------------------
 
-@pytest.mark.skip
+# @pytest.mark.skip
 def test_process_message_order_placed_decrements_stock(consumer_table, sqs_queue):
     seed(consumer_table, {os.environ["KEY_NAME"]: "prod-1", "name": "Widget",
                           "stock": 10, "s3_key": "widget.jpg"})
@@ -47,7 +47,7 @@ def test_process_message_order_placed_decrements_stock(consumer_table, sqs_queue
     assert result is True
     assert item["stock"] == 7
 
-@pytest.mark.skip
+# @pytest.mark.skip
 def test_process_message_order_placed_multiple_items_decrements_each(consumer_table, sqs_queue):
     seed(consumer_table,
          {os.environ["KEY_NAME"]: "prod-1", "name": "Widget", "stock": 10, "s3_key": "widget.jpg"},
@@ -67,7 +67,7 @@ def test_process_message_order_placed_multiple_items_decrements_each(consumer_ta
     assert item1["stock"] == 8
     assert item2["stock"] == 4
 
-@pytest.mark.skip
+# @pytest.mark.skip
 def test_process_message_unknown_event_type_does_not_modify_stock(consumer_table, sqs_queue):
     seed(consumer_table, {os.environ["KEY_NAME"]: "prod-1", "name": "Widget",
                           "stock": 10, "s3_key": "widget.jpg"})
@@ -83,7 +83,7 @@ def test_process_message_unknown_event_type_does_not_modify_stock(consumer_table
     assert result is True
     assert item["stock"] == 10
 
-@pytest.mark.skip
+# @pytest.mark.skip
 def test_processed_message_is_deleted_from_sqs(consumer_table, sqs_queue):
     seed(consumer_table, {os.environ["KEY_NAME"]: "prod-1", "name": "Widget",
                           "stock": 10, "s3_key": "widget.jpg"})
