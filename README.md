@@ -70,6 +70,15 @@ S3_DEFAULT_KEY=<default-s3-key-for-product-images>
 flask run --debug
 ```
 
+## Running the SQS Consumer
+
+The consumer polls an SQS FIFO queue for `order.placed` events and decrements product stock accordingly. It runs as a standalone process separate from the Flask application.
+
+```bash
+python -m app.consumers.consumer
+```
+
+
 ## Running Tests
 
 ```bash
