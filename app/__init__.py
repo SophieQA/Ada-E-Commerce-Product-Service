@@ -15,10 +15,4 @@ def create_app():
             "status": "ok"
         }
     
-    @app.get('/health')
-    def health():
-        return {
-            "status": "healthy"
-        }, 200
-
     return app
