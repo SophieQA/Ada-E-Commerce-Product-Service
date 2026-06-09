@@ -111,7 +111,7 @@ def build_and_run_update(table, id, body):
 def decrement_stock(id, quantity):
     item = validate_item(products_table, id)
     build_and_run_update(products_table, id, {
-        "stock": item["stock"] - quantity
+        "quantity": item["quantity"] - quantity
     })
 
     return True
