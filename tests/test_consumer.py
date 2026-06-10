@@ -45,8 +45,8 @@ def test_process_message_order_placed_decrements_stock(consumer_table, sqs_queue
 
     item = consumer_table.get_item(Key={os.environ["KEY_NAME"]: "prod-1"})["Item"]
     assert result is True
-    # assert item["stock"] == 7
-    assert item["stock"] == 8
+    assert item["stock"] == 7
+    # assert item["stock"] == 8 ( to test when the test failed, how the pipeline look like)
 
 # @pytest.mark.skip
 def test_process_message_order_placed_multiple_items_decrements_each(consumer_table, sqs_queue):
