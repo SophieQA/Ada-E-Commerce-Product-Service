@@ -67,6 +67,7 @@ def delete_product(product_id):
 
 @bp.get('/health')
 def health():
-    return {
-        "status": "healthy"
-    }, 200
+    # return {
+    #     "status": "healthy"
+    # }, 200
+    return {'status': 'healthy', 'version': '1.0.1'}, 200
